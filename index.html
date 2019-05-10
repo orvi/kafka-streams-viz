@@ -67,7 +67,11 @@ Sub-topology: 1
 	Sink: KSTREAM-SINK-0000000008 (topic: streams-count-resolved)
 	<-- KTABLE-TOSTREAM-0000000007
 			</textarea>
-			<h4>Consumer group information <button onclick="update()">update</button></h4>
+			<h4>Consumer group information <button onclick="update()">update</button>
+				<img title="Infomration extracted from the command:
+kafka-consumer-groups --bootstrap-server ${BOOTSTRAP_SERVERS} --describe --group ${GROUP}"
+				 src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACHSURBVEhL7ZSxDcNADMR+uzhbZVTD8B6JVAgw7tjEiroQYOOjVf768w3P8AzfTfPGFhp7SD/c8QgNCjsaFHU0KFIL2lSDIrWgTTUo6mhQ1NGgSC1oUw2K1II21aBILWhTDYrUgjbVoKijQVFHg6K7jj52efwRGtfolR9+zejxZPR4Mnp8iLU+/EY4BRmHDe8AAAAASUVORK5CYII=">
+			</h4>
 			<textarea id="lag_input" onkeydown="scheduleUpdate()" onpaste="scheduleUpdate()">
 TOPIC                          PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG        CONSUMER-ID                                       HOST                           CLIENT-ID
 streams-count-resolved         0          13164704        13164773        69         healthcheck-agent-bf8d1655-63a6-4061-b680-0f11cdf182e5/100.96.67.0                   healthcheck-agent
