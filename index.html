@@ -67,6 +67,12 @@ Sub-topology: 1
 	Sink: KSTREAM-SINK-0000000008 (topic: streams-count-resolved)
 	<-- KTABLE-TOSTREAM-0000000007
 			</textarea>
+			<h4>Consumer group information <button onclick="update()">update</button></h4>
+			<textarea id="lag_input" onkeydown="scheduleUpdate()" onpaste="scheduleUpdate()">
+TOPIC                          PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG        CONSUMER-ID                                       HOST                           CLIENT-ID
+streams-count-resolved         0          13164704        13164773        69         healthcheck-agent-bf8d1655-63a6-4061-b680-0f11cdf182e5/100.96.67.0                   healthcheck-agent
+count-resolved-repartition         1          13161581        13161650        69         healthcheck-agent-bf8d1655-63a6-4061-b680-0f11cdf182e5/100.96.67.0                   healthcheck-agent
+			</textarea>
 		</div>
 
 		<div>
