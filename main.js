@@ -11,7 +11,9 @@ function processName(name) {
 }
 
 // converts kafka stream ascii topo description to DOT language
-function convertTopoToDot(topo) {
+function convertTopoToDot(topo, lagDetails) {
+	const lagInfo = parseLagDetails(lagDetails);
+
 	var lines = topo.split('\n');
 	var results = [];
 	var outside = [];
@@ -91,7 +93,14 @@ function convertTopoToDot(topo) {
 	});
 
 	topics.forEach(node => {
-		results.push(`"${node}" [shape=rect];`)
+		if (node in lagInfo) {
+			const [currentOffset, logEndOffset, lag] = lagInfo[node]
+			const color = (lag > 0)? "color=red;" : "";
+			results.push(`"${node}" [shape=record; ${color} label="{${node} | log-end: ${numberWithCommas(logEndOffset)} |` +
+			`current: ${numberWithCommas(currentOffset)} | lag: ${numberWithCommas(lag)}}"];`);
+		} else {
+			results.push(`"${node}" [shape=rect];`);
+		}
 	});
 
 	return `
@@ -103,9 +112,29 @@ function convertTopoToDot(topo) {
 	`;
 }
 
+
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function parseLagDetails(lagDetails) {
+	// TOPIC PARTITION CURRENT-OFFSET LOG-END-OFFSET LAG CONSUMER-ID HOST CLIENTID
+	lagMapping = {}
+	lagDetails.split('\n').forEach(line => {
+		const [topic, partition, currentOffset, logEndOffset, lag] = line.replace(/ +/g, ' ').split(' ')
+		if (isNaN(partition)) return; // skip header
+		lagMapping[processName(topic.trim())] = [currentOffset, logEndOffset, lag]
+	})
+
+	if (DEBUG) console.log("lag details:\n", lagMapping);
+
+	return lagMapping;
+}
+
 function update() {
 	var topo = input.value;
-	var dotCode = convertTopoToDot(topo);
+	const lagDetails = lag_input.value;
+	var dotCode = convertTopoToDot(topo, lagDetails);
 	if (DEBUG) console.log('dot code\n', dotCode);
 
 
@@ -114,7 +143,7 @@ function update() {
 	var params = {
 		engine: 'dot',
 		format: 'svg'
-  	};
+	};
 
 	var svgCode = Viz(dotCode, params);
 
@@ -170,7 +199,7 @@ function traverseSvgToRough(child) {
 		var opts = getFillStroke(child);
 		rc.path(d, opts);
 		return;
-	  }
+	}
 
 	if (child.nodeName === 'ellipse') {
 		var cx = +child.getAttribute('cx');
@@ -182,7 +211,7 @@ function traverseSvgToRough(child) {
 
 		rc.ellipse(cx, cy, rx * 1.5, ry * 1.5);
 		return;
-  	}
+	}
 
 	if (child.nodeName === 'text') {
 		var fontFamily = child.getAttribute('font-family')
@@ -203,7 +232,7 @@ function traverseSvgToRough(child) {
 
 		ctx.fillText(child.textContent, child.getAttribute('x'), child.getAttribute('y'));
 		return;
-  	}
+	}
 
 	if (child.nodeName === 'polygon') {
 		var pts = child.getAttribute('points')
@@ -219,11 +248,11 @@ function traverseSvgToRough(child) {
 		ctx.save();
 
 		if (transform) {
-	  		var scale = /scale\((.*)\)/.exec(transform);
-	  		if (scale) {
+			var scale = /scale\((.*)\)/.exec(transform);
+			if (scale) {
 				var args = scale[1].split(' ').map(parseFloat);
 				ctx.scale(...args);
-	  		}
+			}
 
 			var rotate = /rotate\((.*)\)/.exec(transform);
 			if (rotate) {
